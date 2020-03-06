@@ -83,49 +83,32 @@ def print_insert(query_parameter):
         to_filter.append(community)
     if not (id or username or community):
         raise exceptions.NotFound()
-
     query = query[:-4] + ';'
-
     results = queries._engine.execute(query, to_filter).fetchall()
-
     return list(map(dict, results))
 
-
-@app.route('/api/retrieve/<int:id>',methods=['GET', 'DELETE'])
-def getPost():
+# 
+@app.route('/api/retrieve/<int:id>',methods=['GET','DELETE'])
+# retrieve and delete a specific post
+def retrieve_post(id):
     if request.method == 'GET':
-        return retrieve_post(request.args)
-    elif request.method == 'DELETE':
-        return delete_post(request.args)
-
-# retrieve a specific post
-def retrieve_post(query_parameter):
-    id = query_parameter.get('id')
-    username = query_parameter.get('username')
-    community = query_parameter.get('community')
-    query = "SELECT * FROM userdata WHERE"
-    to_filter = []
-    if id:
-        query += ' id=? AND'
-        to_filter.append(id)
-    if username:
-        query += ' username=? AND'
-        to_filter.append(username)
-    if community:
-        query += ' community=? AND'
-        to_filter.append(community)
-    if not (id or username or community):
-        raise exceptions.NotFound()
-    query = query[:-4] + ';'
-    results = queries._engine.execute(query, to_filter).fetchall()
-    return list(map(dict, results))
-
-# delete a specifc post
-def delete_post(id):
-    post = queries.post_by_id(id=id)
-    if post:
-        post.pop(id)
-        return status.HTTP_204_NO_CONTENT
+        post = queries.post_by_id(id=id)
+        if post:
+            return post
+        else:
+            raise exceptions.NotFound()
+    if request.method == 'DELETE':
+        if post:
+            return status.HTTP_204_NO_CONTENT
     else:
         raise exceptions.NotFound()
+
+# # delete a specifc post
+# def delete_post(id):
+#     post = queries.post_by_id(id=id)
+#     if post:
+#         post.pop(id)
+#         return status.HTTP_204_NO_CONTENT
+#     else:
+#         raise exceptions.NotFound()
 
